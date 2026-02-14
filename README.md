@@ -34,3 +34,28 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+# Reveally Builder 🚀
+
+Reveally er en avancerede Gamification-as-a-Service platform bygget til retail og optikere.
+
+## 🎮 Inkluderede Spil (11 stk.)
+* **Lucky Scratch**: Klassisk skrabespil.
+* **Spotless**: Produkt-demo (puds brillerne).
+* **ClearView**: Anti-dug demonstration.
+* **Wheel of Vision**: Interaktivt lykkehjul.
+* **Eye-Q Quiz**: Uddannelsesmodul.
+* **Slot Machine**: Casino-style konvertering.
+* **Snake**: Arcade retention spil.
+* **Memory Match**: Produktfokus gennem hukommelse.
+* **Daily Reveal**: Julekalender/Loyalitets-system.
+* **Focus Puzzle**: Branding puslespil.
+* **Hidden Frame**: Visual search udfordring.
+
+## 🛠 Tech Stack
+- **Framework:** Next.js 15 (App Router)
+- **Database:** Supabase
+- **Styling:** Tailwind CSS
+- **State Management:** React Hooks
+- **Validation:** Zod

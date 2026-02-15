@@ -7,17 +7,19 @@ import { z } from 'zod';
 // 0. SPIL DEFINITIONER
 // ---------------------------------------------------------
 export const configSchema = z.object({
-  title: z.string().default('Gør Glasset Spotless!'),
-  brandColor: z.string().default('#F1F5F9'),
-  winMessage: z.string().default('Helt skarpt! Her er 20% på brillerens-sæt.'),
-  productName: z.string().default('Premium Anti-Refleks')
+  title: z.string().default('Puds glasset helt rent'),
+  brandColor: z.string().default('#FFD200'), // Synoptik Gul
+  bgImage: z.string().default('https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1000&auto=format&fit=crop'),
+  winMessage: z.string().default('Skarpt syn! Kom ind og få et gratis rensesæt.'),
+  productName: z.string().default('Synoptik Premium Brillerens')
 });
 
 export const defaultConfig = {
-  title: 'Gør Glasset Spotless!',
-  brandColor: '#F1F5F9',
-  winMessage: 'Helt skarpt! Her er 20% på brillerens-sæt.',
-  productName: 'Premium Anti-Refleks'
+  title: 'Puds glasset helt rent',
+  brandColor: '#FFD200',
+  bgImage: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1000&auto=format&fit=crop',
+  winMessage: 'Skarpt syn! Kom ind og få et gratis rensesæt.',
+  productName: 'Synoptik Premium Brillerens'
 };
 
 // ---------------------------------------------------------
@@ -33,6 +35,28 @@ export function ConfigEditor({ config, onChange }: { config: any, onChange: (c: 
       <div>
         <h3 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Udseende</h3>
         <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Brand Farve</label>
+            <input 
+              type="color" 
+              value={config.brandColor || defaultConfig.brandColor} 
+              onChange={e => updateConfig('brandColor', e.target.value)}
+              className="w-12 h-12 rounded cursor-pointer border-0 p-0"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Baggrundsbillede URL</label>
+            <input 
+              type="text" 
+              value={config.bgImage || defaultConfig.bgImage} 
+              onChange={e => updateConfig('bgImage', e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+              placeholder="https://images.unsplash.com/..."
+            />
+            <p className="text-xs text-slate-500 mt-1">Tip: Brug Unsplash eller din egen hosting</p>
+          </div>
+          
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Overskrift</label>
             <input 
@@ -153,31 +177,43 @@ export function GameComponent({ config }: { config: any }) {
   }, [isClean]);
 
   return (
-    <div className="w-full h-full flex flex-col p-6 items-center justify-center bg-white">
-      <h1 className="text-xl font-bold text-slate-800 mb-8">{safeConfig.title}</h1>
+    <div 
+      className="w-full h-full flex flex-col p-6 items-center justify-center bg-cover bg-center relative"
+      style={{ backgroundImage: `url(${safeConfig.bgImage})` }}
+    >
+      {/* Dark overlay for bedre læsbarhed */}
+      <div className="absolute inset-0 bg-black/65 z-0"></div>
+      
+      {/* Content (ovenpå overlay) */}
+      <div className="relative z-10 flex flex-col items-center">
+        
+        <h1 className="text-2xl font-bold text-white mb-8 drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+          {safeConfig.title}
+        </h1>
 
-      <div className="relative w-[300px] h-[200px] rounded-3xl overflow-hidden shadow-inner border-4 border-slate-100">
-        {/* Det skarpe billede (Præmien/Resultatet) */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-blue-50 text-center p-4">
-          <span className="text-4xl mb-2">✨</span>
-          <p className="font-bold text-blue-900 leading-tight">{safeConfig.productName}</p>
-          {isClean && (
-            <p className="mt-2 text-sm text-green-600 font-bold animate-bounce">
-              {safeConfig.winMessage}
-            </p>
-          )}
+        <div className="relative w-[300px] h-[200px] rounded-3xl overflow-hidden shadow-2xl border-4" style={{ borderColor: safeConfig.brandColor }}>
+          {/* Det skarpe billede (Præmien/Resultatet) */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4" style={{ backgroundColor: safeConfig.brandColor }}>
+            <span className="text-4xl mb-2">✨</span>
+            <p className="font-bold text-slate-900 leading-tight">{safeConfig.productName}</p>
+            {isClean && (
+              <p className="mt-2 text-sm text-slate-900 font-bold animate-bounce bg-white px-3 py-1 rounded-full">
+                {safeConfig.winMessage}
+              </p>
+            )}
+          </div>
+
+          {/* Snavs-laget */}
+          <canvas 
+            ref={canvasRef}
+            className={`absolute inset-0 z-10 transition-opacity duration-1000 ${isClean ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          />
         </div>
 
-        {/* Snavs-laget */}
-        <canvas 
-          ref={canvasRef}
-          className={`absolute inset-0 z-10 transition-opacity duration-1000 ${isClean ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-        />
+        <p className="mt-6 text-white text-sm italic bg-black/50 px-4 py-2 rounded-full">
+          {isClean ? 'Perfekt resultat!' : 'Brug fingeren til at pudse glasset rent...'}
+        </p>
       </div>
-
-      <p className="mt-6 text-slate-400 text-sm italic">
-        {isClean ? 'Perfekt resultat!' : 'Brug fingeren til at pudse glasset rent...'}
-      </p>
     </div>
   );
 }

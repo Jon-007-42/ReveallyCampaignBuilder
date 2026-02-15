@@ -7,25 +7,27 @@ import { z } from 'zod';
 // 0. SPIL DEFINITIONER (Til Game Registry)
 // ---------------------------------------------------------
 export const configSchema = z.object({
-  title: z.string().default('Eye-Q Quiz'),
-  brandColor: z.string().default('#10B981'), // En flot grøn standardfarve
-  question: z.string().default('Hvor ofte bør man få tjekket sit syn?'),
+  title: z.string().default('Synoptik Eye-Q'),
+  brandColor: z.string().default('#FFD200'), // Synoptik Gul
+  bgImage: z.string().default('https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=1000&auto=format&fit=crop'),
+  question: z.string().default('Hvor ofte anbefaler vi, at du får lavet en Certificeret Synsprøve?'),
   answer1: z.string().default('Hvert 5. år'),
   answer2: z.string().default('Hvert 2. år (Korrekt)'),
-  answer3: z.string().default('Kun når man ser dårligt'),
+  answer3: z.string().default('Kun hvis jeg kniber øjnene sammen'),
   correctAnswer: z.number().default(2), // Svar nr. 2 er det rigtige
-  winMessage: z.string().default('Helt rigtigt! Her er 15% rabat på din næste synstest.')
+  winMessage: z.string().default('Helt rigtigt! Få en Gratis Certificeret Synsprøve (Værdi 298 kr.)')
 });
 
 export const defaultConfig = {
-  title: 'Eye-Q Quiz',
-  brandColor: '#10B981',
-  question: 'Hvor ofte bør man få tjekket sit syn?',
+  title: 'Synoptik Eye-Q',
+  brandColor: '#FFD200',
+  bgImage: 'https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=1000&auto=format&fit=crop',
+  question: 'Hvor ofte anbefaler vi, at du får lavet en Certificeret Synsprøve?',
   answer1: 'Hvert 5. år',
   answer2: 'Hvert 2. år (Korrekt)',
-  answer3: 'Kun når man ser dårligt',
+  answer3: 'Kun hvis jeg kniber øjnene sammen',
   correctAnswer: 2,
-  winMessage: 'Helt rigtigt! Her er 15% rabat på din næste synstest.'
+  winMessage: 'Helt rigtigt! Få en Gratis Certificeret Synsprøve (Værdi 298 kr.)'
 };
 
 // ---------------------------------------------------------
@@ -40,15 +42,29 @@ export function ConfigEditor({ config, onChange }: { config: any, onChange: (c: 
     <div className="space-y-6">
       <div>
         <h3 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Udseende</h3>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Brand Farve</label>
-          <div className="flex gap-3">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Brand Farve</label>
+            <div className="flex gap-3">
+              <input 
+                type="color" 
+                value={config.brandColor || defaultConfig.brandColor} 
+                onChange={e => updateConfig('brandColor', e.target.value)}
+                className="w-12 h-12 rounded cursor-pointer border-0 p-0"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Baggrundsbillede URL</label>
             <input 
-              type="color" 
-              value={config.brandColor || defaultConfig.brandColor} 
-              onChange={e => updateConfig('brandColor', e.target.value)}
-              className="w-12 h-12 rounded cursor-pointer border-0 p-0"
+              type="text" 
+              value={config.bgImage || defaultConfig.bgImage} 
+              onChange={e => updateConfig('bgImage', e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+              placeholder="https://images.unsplash.com/..."
             />
+            <p className="text-xs text-slate-500 mt-1">Tip: Brug Unsplash eller din egen hosting</p>
           </div>
         </div>
       </div>
@@ -165,6 +181,7 @@ export function GameComponent({ config }: { config: any }) {
   const safeConfig = {
     title: config?.title || defaultConfig.title,
     brandColor: config?.brandColor || defaultConfig.brandColor,
+    bgImage: config?.bgImage || defaultConfig.bgImage,
     question: config?.question || defaultConfig.question,
     answer1: config?.answer1 || defaultConfig.answer1,
     answer2: config?.answer2 || defaultConfig.answer2,
@@ -186,11 +203,17 @@ export function GameComponent({ config }: { config: any }) {
 
   if (hasWon) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center" style={{ backgroundColor: safeConfig.brandColor }}>
-        <div className="bg-white p-8 rounded-3xl shadow-2xl relative overflow-hidden w-full max-w-[300px]">
+      <div 
+        className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-cover bg-center relative"
+        style={{ backgroundImage: `url(${safeConfig.bgImage})` }}
+      >
+        {/* Dark overlay for at gøre baggrunden læselig */}
+        <div className="absolute inset-0 bg-black/70 z-0"></div>
+        
+        <div className="bg-white p-8 rounded-3xl shadow-2xl relative overflow-hidden w-full max-w-[300px] z-10">
            <div className="text-6xl mb-4">🏆</div>
            <h2 className="text-2xl font-black text-slate-900 mb-4">Korrekt!</h2>
-           <p className="text-lg font-medium text-slate-700 bg-green-50 p-4 rounded-xl border border-green-100">
+           <p className="text-lg font-medium text-slate-700 bg-yellow-50 p-4 rounded-xl border-2 border-yellow-400">
              {safeConfig.winMessage}
            </p>
         </div>
@@ -204,50 +227,68 @@ export function GameComponent({ config }: { config: any }) {
   }
 
   return (
-    <div className="w-full h-full flex flex-col p-6 items-center" style={{ backgroundColor: safeConfig.brandColor }}>
+    <div 
+      className="w-full h-full flex flex-col p-6 items-center bg-cover bg-center relative"
+      style={{ backgroundImage: `url(${safeConfig.bgImage})` }}
+    >
+      {/* Dark overlay for bedre læsbarhed */}
+      <div className="absolute inset-0 bg-black/60 z-0"></div>
       
-      {/* Brand Header */}
-      <div className="bg-white/10 w-full py-4 rounded-2xl mb-8 text-center backdrop-blur-sm border border-white/20">
-        <h1 className="text-2xl font-black text-white drop-shadow-md">
-          {safeConfig.title}
-        </h1>
-      </div>
-
-      {/* Spørgsmål Boks */}
-      <div className="bg-white w-full rounded-3xl shadow-2xl p-6 mb-8 relative">
-        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 font-bold px-4 py-1 rounded-full shadow-md text-sm">
-          Dagens Spørgsmål
+      {/* Content (ovenpå overlay) */}
+      <div className="relative z-10 w-full flex flex-col items-center">
+        
+        {/* Brand Header */}
+        <div 
+          className="w-full py-4 rounded-2xl mb-8 text-center backdrop-blur-sm border-2"
+          style={{ 
+            backgroundColor: `${safeConfig.brandColor}20`,
+            borderColor: safeConfig.brandColor
+          }}
+        >
+          <h1 className="text-2xl font-black text-white drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            {safeConfig.title}
+          </h1>
         </div>
-        <p className="text-xl font-bold text-slate-800 text-center mt-4">
-          {safeConfig.question}
-        </p>
-      </div>
 
-      {/* Svarmuligheder */}
-      <div className="w-full space-y-4">
-        {[1, 2, 3].map((num) => {
-          const answerText = num === 1 ? safeConfig.answer1 : num === 2 ? safeConfig.answer2 : safeConfig.answer3;
-          const isWrong = wrongAnswer === num;
-          
-          return (
-            <button
-              key={num}
-              onClick={() => handleAnswer(num)}
-              // Hvis svaret er forkert, tilføjer vi en rød farve og en lille ryste-effekt
-              className={`w-full py-4 px-6 rounded-2xl font-bold text-lg shadow-lg transition-all
-                ${isWrong 
-                  ? 'bg-red-500 text-white translate-x-[-10px]' // Ryste-effekt (Simpel)
-                  : 'bg-white text-slate-800 hover:scale-105 active:scale-95'
-                }
-              `}
-              style={isWrong ? { transition: 'transform 0.1s ease-in-out' } : {}}
-            >
-              {answerText}
-            </button>
-          );
-        })}
-      </div>
+        {/* Spørgsmål Boks */}
+        <div className="bg-white w-full rounded-3xl shadow-2xl p-6 mb-8 relative">
+          <div 
+            className="absolute -top-6 left-1/2 transform -translate-x-1/2 font-bold px-4 py-1 rounded-full shadow-md text-sm text-black"
+            style={{ backgroundColor: safeConfig.brandColor }}
+          >
+            Dagens Spørgsmål
+          </div>
+          <p className="text-xl font-bold text-slate-800 text-center mt-4">
+            {safeConfig.question}
+          </p>
+        </div>
 
+        {/* Svarmuligheder */}
+        <div className="w-full space-y-4">
+          {[1, 2, 3].map((num) => {
+            const answerText = num === 1 ? safeConfig.answer1 : num === 2 ? safeConfig.answer2 : safeConfig.answer3;
+            const isWrong = wrongAnswer === num;
+            
+            return (
+              <button
+                key={num}
+                onClick={() => handleAnswer(num)}
+                // Hvis svaret er forkert, tilføjer vi en rød farve og en lille ryste-effekt
+                className={`w-full py-4 px-6 rounded-2xl font-bold text-lg shadow-lg transition-all
+                  ${isWrong 
+                    ? 'bg-red-500 text-white translate-x-[-10px]' // Ryste-effekt (Simpel)
+                    : 'bg-white text-slate-800 hover:scale-105 active:scale-95'
+                  }
+                `}
+                style={isWrong ? { transition: 'transform 0.1s ease-in-out' } : {}}
+              >
+                {answerText}
+              </button>
+            );
+          })}
+        </div>
+
+      </div>
     </div>
   );
 }

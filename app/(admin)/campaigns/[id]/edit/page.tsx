@@ -71,18 +71,33 @@ export default function CampaignEditor({ params }: { params: Promise<{ id: strin
   };
 
   // NY FUNKTION: Kopier linket
-  const handleCopyLink = () => {
-    // Vi bygger det rigtige link baseret på, hvor hjemmesiden bor lige nu (f.eks. localhost eller vercel)
+const handleCopyLink = () => {
     const baseUrl = window.location.origin;
     const playUrl = `${baseUrl}/play/${resolvedParams.id}`;
     
-    navigator.clipboard.writeText(playUrl);
-    setCopySuccess(true);
-    
-    // Skift tilbage til "Kopier" efter 3 sekunder
-    setTimeout(() => setCopySuccess(false), 3000);
+    // Robust kopi-metode
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(playUrl).then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 3000);
+      });
+    } else {
+      // Fallback hvis navigator fejler
+      const textArea = document.createElement("textarea");
+      textArea.value = playUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopySuccess(true);
+      } catch (err) {
+        console.error('Kunne ikke kopiere', err);
+      }
+      document.body.removeChild(textArea);
+      setTimeout(() => setCopySuccess(false), 3000);
+    }
   };
-
+  
   if (isLoading || !isMounted) {
     return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500">Indlæser editor...</div>;
   }

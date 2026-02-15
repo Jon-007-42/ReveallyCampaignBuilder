@@ -7,19 +7,21 @@ import { z } from 'zod';
 // 0. SPIL DEFINITIONER
 // ---------------------------------------------------------
 export const configSchema = z.object({
-  title: z.string().default('Tør Duggen Af!'),
-  brandColor: z.string().default('#0F172A'), // Mørk, vinterlig baggrund (Slate 900)
+  title: z.string().default('Tør duggen af'),
+  brandColor: z.string().default('#000000'), // Synoptik Sort
+  bgImage: z.string().default('https://images.unsplash.com/photo-1445543949571-ffc3e0e2f55e?q=80&w=1000&auto=format&fit=crop'),
   wipeColor: z.string().default('rgba(255, 255, 255, 0.85)'), // Halvgennemsigtig hvid (Dug/Frost)
-  winMessage: z.string().default('Varm kaffe på vores regning! ☕'),
-  bgImageText: z.string().default('❄️ VINTER UDSALG ❄️') // Teksten der gemmer sig bag duggen
+  winMessage: z.string().default('Træt af duggede briller? Få 50% på anti-dug behandling.'),
+  bgImageText: z.string().default('NY VINTERKOLLEKTION') // Teksten der gemmer sig bag duggen
 });
 
 export const defaultConfig = {
-  title: 'Tør Duggen Af!',
-  brandColor: '#0F172A',
+  title: 'Tør duggen af',
+  brandColor: '#000000',
+  bgImage: 'https://images.unsplash.com/photo-1445543949571-ffc3e0e2f55e?q=80&w=1000&auto=format&fit=crop',
   wipeColor: 'rgba(255, 255, 255, 0.85)',
-  winMessage: 'Varm kaffe på vores regning! ☕',
-  bgImageText: '❄️ VINTER UDSALG ❄️'
+  winMessage: 'Træt af duggede briller? Få 50% på anti-dug behandling.',
+  bgImageText: 'NY VINTERKOLLEKTION'
 };
 
 // ---------------------------------------------------------
@@ -46,6 +48,19 @@ export function ConfigEditor({ config, onChange }: { config: any, onChange: (c: 
               />
             </div>
           </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Baggrundsbillede URL</label>
+            <input 
+              type="text" 
+              value={config.bgImage || defaultConfig.bgImage} 
+              onChange={e => updateConfig('bgImage', e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+              placeholder="https://images.unsplash.com/..."
+            />
+            <p className="text-xs text-slate-500 mt-1">Tip: Brug Unsplash eller din egen hosting</p>
+          </div>
+          
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Overskrift</label>
             <input 
@@ -96,6 +111,7 @@ export function GameComponent({ config }: { config: any }) {
   const safeConfig = {
     title: config?.title || defaultConfig.title,
     brandColor: config?.brandColor || defaultConfig.brandColor,
+    bgImage: config?.bgImage || defaultConfig.bgImage,
     wipeColor: config?.wipeColor || defaultConfig.wipeColor,
     winMessage: config?.winMessage || defaultConfig.winMessage,
     bgImageText: config?.bgImageText || defaultConfig.bgImageText
@@ -202,58 +218,64 @@ export function GameComponent({ config }: { config: any }) {
   }, [safeConfig.wipeColor, isWiped]);
 
   return (
-    <div className="w-full h-full flex flex-col p-6 items-center bg-cover bg-center" style={{ backgroundColor: safeConfig.brandColor }}>
+    <div 
+      className="w-full h-full flex flex-col p-6 items-center bg-cover bg-center relative"
+      style={{ backgroundImage: `url(${safeConfig.bgImage})` }}
+    >
+      {/* Dark overlay for bedre læsbarhed */}
+      <div className="absolute inset-0 bg-black/70 z-0"></div>
       
-      <div className="w-full py-4 mb-8 text-center">
-        <h1 className="text-3xl font-black text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] tracking-wide">
-          {safeConfig.title}
-        </h1>
-      </div>
-
-      <div 
-        ref={containerRef}
-        className="relative w-[300px] h-[250px] bg-slate-200 rounded-lg shadow-[0_0_15px_rgba(255,255,255,0.2)] overflow-hidden flex items-center justify-center border-8 border-slate-800"
-      >
-        {/* LAG 1: Det der er "bagved" ruden (Butikken/Præmien) */}
-        <div className="absolute inset-0 bg-blue-900 flex flex-col items-center justify-center p-4 text-center">
-          {/* Falsk "baggrundsbillede" (Kan gøres dynamisk senere) */}
-          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/brick-wall-dark.png')]"></div>
-          
-          {!isWiped ? (
-            <h2 className="text-3xl font-bold text-white opacity-40 blur-[2px]">
-              {safeConfig.bgImageText}
-            </h2>
-          ) : (
-             <div className="z-10 animate-in zoom-in duration-500">
-               <span className="text-4xl block mb-2">🎁</span>
-               <p className="font-bold text-white text-xl bg-blue-800/80 p-3 rounded-xl border border-blue-400">
-                 {safeConfig.winMessage}
-               </p>
-             </div>
-          )}
+      {/* Content (ovenpå overlay) */}
+      <div className="relative z-10 flex flex-col items-center w-full">
+        
+        <div className="w-full py-4 mb-8 text-center">
+          <h1 className="text-3xl font-black text-white drop-shadow-lg tracking-wide" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            {safeConfig.title}
+          </h1>
         </div>
 
-        {/* LAG 2: Selve Duggen (Canvas) */}
-        <canvas 
-          ref={canvasRef}
-          className={`absolute inset-0 z-10 transition-opacity duration-1000 ease-in-out touch-none ${isWiped ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'}`}
-          style={{ filter: 'drop-shadow(0px 0px 5px rgba(255,255,255,0.5))' }} // Giver duggen lidt glød
-        />
-      </div>
+        <div 
+          ref={containerRef}
+          className="relative w-[300px] h-[250px] bg-slate-200 rounded-lg shadow-2xl overflow-hidden flex items-center justify-center border-8 border-slate-800"
+        >
+          {/* LAG 1: Det der er "bagved" ruden (Butikken/Præmien) */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-blue-700 flex flex-col items-center justify-center p-4 text-center">
+            
+            {!isWiped ? (
+              <h2 className="text-3xl font-bold text-white opacity-40 blur-[2px]">
+                {safeConfig.bgImageText}
+              </h2>
+            ) : (
+               <div className="z-10 animate-in zoom-in duration-500">
+                 <span className="text-4xl block mb-2">🎁</span>
+                 <p className="font-bold text-slate-900 text-lg px-4 py-3 rounded-xl border-2" style={{ backgroundColor: '#FFD200', borderColor: '#000000' }}>
+                   {safeConfig.winMessage}
+                 </p>
+               </div>
+            )}
+          </div>
 
-      <div className="mt-8 text-white/60 text-sm font-medium">
-        {isWiped ? 'Fantastisk!' : 'Gnid på skærmen for at se ruden'}
-      </div>
-
-      {/* SNE-EFFEKT i stedet for Konfetti */}
-      {showSnow && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden flex justify-center z-50">
-           <div className="text-4xl animate-[bounce_3s_infinite] mt-10 ml-10 opacity-70">❄️</div>
-           <div className="text-3xl animate-[bounce_4s_infinite] mt-20 mr-20 opacity-50">❄️</div>
-           <div className="text-5xl animate-[bounce_2s_infinite] mt-5 ml-32 opacity-80">❄️</div>
+          {/* LAG 2: Selve Duggen (Canvas) */}
+          <canvas 
+            ref={canvasRef}
+            className={`absolute inset-0 z-10 transition-opacity duration-1000 ease-in-out touch-none ${isWiped ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'}`}
+            style={{ filter: 'drop-shadow(0px 0px 5px rgba(255,255,255,0.5))' }} // Giver duggen lidt glød
+          />
         </div>
-      )}
-      
+
+        <div className="mt-8 text-white text-sm font-medium bg-black/50 px-4 py-2 rounded-full">
+          {isWiped ? 'Fantastisk!' : 'Gnid på skærmen for at se ruden'}
+        </div>
+
+        {/* SNE-EFFEKT i stedet for Konfetti */}
+        {showSnow && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden flex justify-center z-50">
+             <div className="text-4xl animate-[bounce_3s_infinite] mt-10 ml-10 opacity-70">❄️</div>
+             <div className="text-3xl animate-[bounce_4s_infinite] mt-20 mr-20 opacity-50">❄️</div>
+             <div className="text-5xl animate-[bounce_2s_infinite] mt-5 ml-32 opacity-80">❄️</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
